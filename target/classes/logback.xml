@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--configuration用于配置
+    scan表示本文件是否重新加载当配置文件发生改变
+    scanPeriod设置检测配置文件的修改时间间隔，默认为分钟，发现变化就会重新加载本文件
+    debug为ture将打印出logback出内部的信息，实时查看logback内部的状态-->
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <!--定义参数常量-->
+    <!--对于logback，有以下日志级别
+    TRACE < DEBUG < INFO < WARN < ERROR，通常用DEBUG、INFO、ERROR-->
+    <!--举个例子：有一个logger的实例logger.trace("msg")，
+    指定高级别的日志将会隐藏较低级别的日志信息-->
+    <property name="log.level" value="debug"/>
+    <!--log保留的时间-->
+    <property name="log.maxHistory" value="30"/>
+    <!--标志日志存储的根路径，将日志存在tomcat的根目录中-->
+    <property name="log.filePath" value="${catalina.base}/logs/webapps"/>
+    <!--日志展现的格式，最后标识由哪个线程执行的以及日志信息（日志级别、类、信息）-->
+    <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS}[%thread] %-5level %logger{50} -%msg%n"/>
+
+    <!--告知输出介质，控制台输出设置-->
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <!--encoder既负责转换事件为String，也负责输出到文件中，而layout仅仅负责格式化，也就是将事件转换为String
+        pattern用于设置输出格式-->
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!--DEBUG日志
+        文件会随着size的增大或者时间的推移生成新的文件-->
+    <appender name="debugAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--文件路径-->
+        <file>${log.filePath}/debug.log</file>
+        <!--文件滚动的策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--文件名称，这里设定了时间单位（天），gz表示logback会自动将文件进行压缩-->
+            <fileNamePattern>
+                ${log.filePath}/debug/debug.%d{yyyy-MM-dd}.log.gz
+            </fileNamePattern>
+            <!--文件最大的保存历史数量-->
+            <MaxHistory>
+                ${log.MaxHistory}
+            </MaxHistory>
+        </rollingPolicy>
+        <!--定义日志输出的格式-->
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <!--过滤掉非DEBUG level的日志
+            omMatch指定符合level级别的日志信息将会记录下来
+            omMisMatch则对于非level级别的日志将会采取的操作，此处过滤-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!--INFO日志，下面这几种就是在DEBUG的基础上复制简单修改
+        文件会随着size的增大或者时间的推移生成新的文件-->
+    <appender name="infoAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--文件路径-->
+        <file>${log.filePath}/info.log</file>
+        <!--文件滚动的策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--文件名称，这里设定了时间单位（天），gz表示logback会自动将文件进行压缩-->
+            <fileNamePattern>
+                ${log.filePath}/info/info.%d{yyyy-MM-dd}.log.gz
+            </fileNamePattern>
+            <!--文件最大的保存历史数量-->
+            <MaxHistory>
+                ${log.MaxHistory}
+            </MaxHistory>
+        </rollingPolicy>
+        <!--定义日志输出的格式-->
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <!--过滤掉非DEBUG level的日志
+            omMatch指定符合level级别的日志信息将会记录下来
+            omMisMatch则对于非level级别的日志将会采取的操作，此处过滤-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!--ERROR日志，下面这几种就是在DEBUG的基础上复制简单修改
+        文件会随着size的增大或者时间的推移生成新的文件-->
+    <appender name="errorAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--文件路径-->
+        <file>${log.filePath}/error.log</file>
+        <!--文件滚动的策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--文件名称，这里设定了时间单位（天），gz表示logback会自动将文件进行压缩-->
+            <fileNamePattern>
+                ${log.filePath}/error/error.%d{yyyy-MM-dd}.log.gz
+            </fileNamePattern>
+            <!--文件最大的保存历史数量-->
+            <MaxHistory>
+                ${log.MaxHistory}
+            </MaxHistory>
+        </rollingPolicy>
+        <!--定义日志输出的格式-->
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <!--过滤掉非DEBUG level的日志
+            omMatch指定符合level级别的日志信息将会记录下来
+            omMisMatch则对于非level级别的日志将会采取的操作，此处过滤-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!--设置此logger该关注的是那个package下面的信息（name），一个类只能对应一个logger，
+        以及记录level级别以上的信息，
+        并且需要跟与文件相关的appender绑定
+        additivity为true的时候，logger将会将root的appender加到本logger当中，并且不会覆盖此logger的level-->
+    <logger name="com.kindol.o2o" level="${log.level}" additivity="true">
+        <appender-ref ref="debugAppender"/>
+        <appender-ref ref="infoAppender"/>
+        <appender-ref ref="errorAppender"/>
+    </logger>
+
+    <!--根logger，如果没有指定logger的level，将会继承root的level-->
+    <root level="info">
+        <appender-ref ref="consoleAppender"/>
+    </root>
+</configuration>

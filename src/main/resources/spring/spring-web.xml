@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
+    <!-- 配置SpringMVC -->
+
+    <!-- 1.开启SpringMVC注解模式，自动识别controller类 -->
+    <!-- 简化配置： (1)自动注册DefaultAnootationHandlerMapping,AnotationMethodHandlerAdapter
+        (2)提供一些列：数据绑定，数字和日期的format @NumberFormat, @DateTimeFormat, xml,json默认读写支持 -->
+    <mvc:annotation-driven />
+
+    <!-- 2.静态资源由默认servlet配置，而不经过servlet拦截，<mvc:default-servlet-handler />即完成以上功能
+    (1)加入对静态资源的处理：js,gif,png
+    (2)允许使用"/"做整体映射 -->
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+    <mvc:default-servlet-handler />
+
+    <!-- 3.定义视图解析器，根据URL请求解析出相应的html页面，外部不能直接对WEB-INF访问，而内部程序则可以，
+     通过dispatcher servlet进行转向，先去请求controller，再转到对应的html页面
+     suffix表示自动添加后缀,
+     preifx表示自动添加头部-->
+    <bean id="viewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/html/"></property>
+        <property name="suffix" value=".html"></property>
+    </bean>
+
+    <!--文件上传解析器，不能没有，否则无法处理图片-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="utf-8"></property>
+        <!--上传最大文件为20M-->
+        <property name="maxUploadSize" value="20971520"></property>
+        <property name="maxInMemorySize" value="20971520"></property>
+    </bean>
+
+    <!-- 4.扫描web相关的bean -->
+    <context:component-scan base-package="com.kindol.o2o.web" />
+
+    <!-- 5.权限拦截器，AOP思想的体现 -->
+    <mvc:interceptors>
+        <!-- 检验是否已登录店铺管理系统的拦截器 -->
+        <mvc:interceptor>
+            <!--拦截shopadmin下面的所有方法-->
+            <mvc:mapping path="/shopadmin/**"/>
+            <bean id="ShopInterceptor"
+                  class="com.kindol.o2o.interceptor.shopadmin.ShopLoginInterceptor"/>
+        </mvc:interceptor>
+        <!-- 检验是否对店铺有操作权限的拦截器 -->
+        <mvc:interceptor>
+            <mvc:mapping path="/shopadmin/**"/>
+            <!--以下方法排除拦截范围，使用exclude-mapping标签-->
+            <!--shoplist page-->
+            <mvc:exclude-mapping path="/shopadmin/shoplist"/>
+            <mvc:exclude-mapping path="/shopadmin/getshoplist"/>
+            <!--shopregister page-->
+            <mvc:exclude-mapping path="/shopadmin/getshopinitinfo"/>
+            <mvc:exclude-mapping path="/shopadmin/registershop"/>
+            <mvc:exclude-mapping path="/shopadmin/shopoperation"/>
+            <!--shopmanage page-->
+            <mvc:exclude-mapping path="/shopadmin/shopmanagement"/>
+            <mvc:exclude-mapping path="/shopadmin/getshopmanagementinfo"/>
+            <bean id="ShopPermissionInterceptor"
+                  class="com.kindol.o2o.interceptor.shopadmin.ShopPermissionInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+</beans>

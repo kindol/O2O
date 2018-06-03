@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace表明本XML和对应的DAO相匹配-->
+<mapper namespace="com.kindol.o2o.dao.AreaDao">
+    <!--id表示对应的DAO的方法，resultType表示希望返回的结果为Area对象-->
+    <!--hibernate需要注入HQL等奇怪的语法，而mybatis不需要-->
+    <select id="queryArea" resultType="com.kindol.o2o.entity.Area">
+        SELECT area_id, area_name, priority, create_time, last_edit_time
+        FROM tb_area
+        ORDER BY priority DESC
+    </select>
+</mapper>
